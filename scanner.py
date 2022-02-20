@@ -12,7 +12,10 @@ def multiline_comment_remove(buffer1):
     #Find all comments in buffer
     y = re.finditer(MULTILINE_COMM, buffer1)
     for i in y:
-        buffer1 = buffer1.replace(i.group(), '')
+        replace=''
+        for x in range(i.group().count('\n')):
+            replace+="\n"
+        buffer1 = buffer1.replace(i.group(), replace)
         #Replace comments with whitespace
 
     return buffer1
