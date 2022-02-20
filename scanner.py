@@ -24,7 +24,15 @@ def print_symbol_table(symbol_table):
 def add_to_symbol_table(i,col,k,type_found,token):
     symbol_table.append((token,"Line {} cols {}-{} is {}".format(i+1,col+1,k,type_found)))
     return True
-
+def id_type_finder(token):
+    KEYWORDS=r"^boolean$|^break$|^continue$|^class$|^else$|^extends$|^float$|^for$|^if$|^int$|^new$|^null$|^private$|^public$|^return$|^static$|^super|^this$|^void$|^while$"
+    BOOL_CONST=r"^true$|^false$"
+    if(re.search(KEYWORDS,token)):
+        return "T_{}".format(token.capitalize())
+    elif(re.search(BOOL_CONST,token)):
+        return "T_BoolConstant"
+    else: 
+        return "T_Identifier"
 
 KEYWORDS=["boolean", "break", "continue", "class", "else", "extends",
 "false", "float", "for", "if", "int", "new",
@@ -93,6 +101,9 @@ for i in range(len(lines)):
         elif (match):
             #End of longest token found
             match=False
+            if type_found=="T_Identifier":
+                type_found=id_type_finder(lines[i][col:k-1])
+            #Check for keywords    
             add_to_symbol_table(i,col,k,type_found,lines[i][col:k-1])
             #Add to symbol table
             if(re.search(OPERATORS,lines[i][k-1:k])or re.search(OPERATORS,type_found)):k-=1
