@@ -1,3 +1,10 @@
+#Made by: 
+#Aozhou Hao 183152440
+#Andrew Camilleri 180405850
+#Raul Rivera 180864980
+#Feb 20, 2022
+
+
 import re
 def multiline_comment_remove(buffer1):
     #MULTILINE_COMM=r"\b/\*.+?\*/\b"
