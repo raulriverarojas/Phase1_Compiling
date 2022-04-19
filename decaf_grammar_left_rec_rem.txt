@@ -1,0 +1,117 @@
+Program ::= Decl ProgramOr
+ProgramOr ::= Decl ProgramOr 
+ProgramOr ::= ε
+Decl ::= DeclLeftFact
+Decl ::= FunctionDecl 
+Decl ::= ClassDecl 
+Decl ::= InterfaceDecl 
+DeclLelftFact ::= Type ident VarFunDecl
+VarFunDecl ::= ; 
+VarFunDecl ::= ( Formals ) StmtBlock  
+Type ::= int TypeRec 
+Type ::= double TypeRec 
+Type ::= bool TypeRec 
+Type ::= string TypeRec 
+Type ::= ident TypeRec
+TypeRec ::= [] TypeRec
+TypeRec ::= ε
+FunctionDecl ::= void ident ( Formals ) StmtBlock
+Formals ::= FormalsPlus
+Formals ::= ε
+FormalsPlus ::= Variable FormalsList
+FormalsList ::= , Variable FormalsList 
+FormalsList ::= ε
+ClassDecl ::= class ident ExtendsOR ImplementsOP { FieldsOP }
+ExtendsOR ::= extends ident 
+ExtendsOR ::= ε
+ImplementsOP ::= implements ident ImplementsLst
+ImplementsOP ::= ε
+ImplementsLst ::= , ident ImplementsLst 
+ImplementsLst ::= ε
+FieldsOP ::= Field FieldsOP 
+FieldsOP ::= ε
+Field ::= VariableDecl 
+Field ::= FunctionDecl
+InterfaceDecl ::= interface ident { InterfaceProt }
+InterfaceProt ::= Prototype InterfaceProt 
+InterfaceProt ::= ε
+Prototype ::= Type ident ( Formals ) ; 
+Prototype ::= void ident ( Formals ) ;
+StmtBlock ::= { VarDeclStar  StmtStar }
+VarDeclStar ::= VariableDecl VarDeclStar 
+VarDeclStar ::= ε
+StmtStar ::= Stmt StmtStar 
+StmtStar ::= ε
+Stmt ::= ExprOR ; 
+Stmt ::= IfStmt  
+Stmt ::= WhileStmt 
+Stmt ::=  ForStmt 
+Stmt ::= BreakStmt 
+Stmt ::= ReturnStmt  
+Stmt ::= PrintStmt  
+Stmt ::= StmtBlock
+IfStmt ::= if ( Expr ) Stmt ElseStmt
+ElseStmt ::= else Stmt 
+ElseStmt ::= ε
+WhileStmt ::= while ( Expr ) Stmt
+ForStmt ::= for ( ExprOr ; Expr ; ExprOr ) Stmt
+ReturnStmt ::= return ExprOr ;
+ExprOR ::= Expr 
+ExprOR ::= ε
+BreakStmt ::= break ;
+PrintStmt ::= Print ( ExprPlus ) ;
+ExprPlus ::= Expr ExprLst
+ExprLst ::= , Expr ExprLst 
+ExprLst ::= ε
+
+
+LValCall ::= ident LValCallFact
+LValCallFact ::= ( Actuals )
+LValCallFact ::= ExprLCall
+
+ExprLCall ::= = Expr
+ExprLCall ::= ε
+
+Expr ::= LValCall REC
+
+
+
+Expr ::= Constant REC
+Expr ::= this REC
+Expr ::= ( Expr ) REC
+Expr ::= - Expr REC
+Expr ::= ! Expr REC
+Expr ::= ReadInteger ( ) REC
+Expr ::= ReadLine ( ) REC
+Expr ::= new ident REC
+Expr ::= NewArray ( Expr , Type ) REC
+
+REC ::= . ident RECFACT REC
+REC ::= [ Expr ] REC
+RECFACT ::= ε
+RECFACT ::= ( Actuals )
+
+REC ::= + Expr REC
+REC ::= – Expr REC
+REC ::= * Expr REC
+REC ::= / Expr REC
+REC ::= % Expr REC
+REC ::= < Expr REC
+REC ::= <= Expr REC
+REC ::= > Expr REC
+REC ::= >= Expr REC
+REC ::= == Expr REC
+REC ::= != Expr REC
+REC ::= && Expr REC
+REC ::= || Expr REC
+REC ::= ε
+
+
+
+Actuals ::=  ExprPlus 
+Actuals ::= ε
+Constant ::= intConstant 
+Constant ::= doubleConstant 
+Constant ::= boolConstant 
+Constant ::= stringConstant 
+Constant ::= null
