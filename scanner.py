@@ -39,15 +39,41 @@ def write_out_symbol_table(symbol_table):
 def add_to_symbol_table(i,col,k,type_found,token):
     symbol_table.append((token,"Line {} cols {}-{} is {}".format(i+1,col+1,k,type_found)))
     return True
+def write_out_error_table(error_table):
+    errorFile = open("error_file.txt", "w")
+    for error in error_table:
+        errorFile.write("{}: {}\n".format(error[1],error[0]))
+    errorFile.close()
+def report_error(i, col, k, token, error_table):
+    error_table.append((token,"Error at Line {} cols {}-{}".format(i+1,col+1,k)))
+    return error_table
+def compatible_type(type_found,nextChar, OPERATORS, DEC, HEX, IDENTIFIER):
+    if re.search(OPERATORS, nextChar):
+        return True
+    elif type_found=="ident":
+        if re.search(DEC,nextChar) or re.search(HEX,nextChar) :
+            return False
+        else: 
+            return True
+    elif type_found=="int":
+        if re.search(IDENTIFIER,nextChar):
+            return False
+        else:
+            return True
+            
+
+    return True
+
 def id_type_finder(token):
     KEYWORDS=r"^boolean$|^break$|^continue$|^class$|^else$|^extends$|^float$|^for$|^if$|^int$|^new$|^null$|^private$|^public$|^return$|^static$|^super|^this$|^void$|^while$"
     BOOL_CONST=r"^true$|^false$"
     if(re.search(KEYWORDS,token)):
-        return "T_{}".format(token.capitalize())
+        return token
     elif(re.search(BOOL_CONST,token)):
-        return "T_BoolConstant"
+        return "bool"
     else: 
-        return "T_Identifier"
+        return "ident"
+
 
 KEYWORDS=["boolean", "break", "continue", "class", "else", "extends",
 "false", "float", "for", "if", "int", "new",
@@ -103,9 +129,9 @@ while buffer1:
             #If token is found
             if (id or dec or hex or operators):
                 match=True
-                if id: type_found="T_Identifier"
-                elif dec: type_found="T_IntegerConstant"
-                elif hex: type_found="T_IntegerConstant"
+                if id: type_found="ident"
+                elif dec: type_found="int"
+                elif hex: type_found="int"
                 elif operators: type_found=operators.group()
                 
                 if(k==len(lines[i])): 
@@ -116,23 +142,30 @@ while buffer1:
             elif (match):
                 #End of longest token found
                 match=False
-                if type_found=="T_Identifier":
+                if type_found=="ident":
                     type_found=id_type_finder(lines[i][col:k-1])
                 #Check for keywords    
                 add_to_symbol_table(i,col,k,type_found,lines[i][col:k-1])
                 #Add to symbol table
-                if(not re.search(r"/s",lines[i][k-1:k])): k-=1
+                if(lines[i][k-1:k]!=" "):
+                    nextChar=lines[i][k-1:k]
+                    if (compatible_type(type_found,lines[i][k-1:k],OPERATORS,HEX,DEC,IDENTIFIER)):
+                        k-=1
+                    else:
+                        error_table=report_error(i,col,k,lines[i][col:k], error_table)
+                        error=True
+                        k-=1
                 #If next char is not whitespace, decrement. Just so we dont miss any chars
                 col=k
             elif(not match and token):
                 error=True
                 if(k==len(lines[i])): 
-                    add_to_symbol_table(i,col,k,"ERROR",lines[i][col:k])
+                    error_table=report_error(i,col,k,lines[i][col:k], error_table)
                     #If end of line
 
             elif(not match and error):
                 error=False
-                add_to_symbol_table(i,col,k,"ERROR",lines[i][col:k-1])
+                error_table=report_error(i,col,k,lines[i][col:k], error_table)
                 if(not re.search(r"/s",lines[i][k-1:k])): k-=1
                 #If next char is not whitespace, decrement. Just so we dont miss any chars
             else: 
@@ -144,6 +177,7 @@ while buffer1:
 f.close()
 #print_symbol_table(symbol_table)
 write_out_symbol_table(symbol_table)
+write_out_error_table(error_table)
 
 
         
