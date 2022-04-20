@@ -1,8 +1,12 @@
+from email import header
 import re
 import numpy as np
 from turtle import right
 from collections import deque
 from tabulate import tabulate
+from anytree import Node, RenderTree
+from anytree.exporter import DotExporter
+from graphviz import Source, render
 
 
 def computeFirsts(prod, terminals, nonterminals):
@@ -24,6 +28,7 @@ def computeFirsts(prod, terminals, nonterminals):
         change = False
         for i in range(len(prod)):
             rightside = prod[i][1]
+            
             rightprods = rightside.split()
             if rightprods[0] in nonterminals:
                 for x in range(len(firsts[rightprods[0]])):
@@ -102,6 +107,7 @@ def computeFollow(prod, firsts, terminals, nonterminals, start):
         change = False
         for i in range(len(prod)):
             rightside = prod[i][1]
+            
             rightprods = rightside.split()
             for j in range(len(rightprods)):
 
@@ -130,6 +136,7 @@ def computeLL1Table(prod, terminals, nonterminals, firsts, follow):
              for o in range(len(nonterminals))]
     for i in range(len(prod)):
         rightside = prod[i][1]
+        
         rightprods = rightside.split()
         for j in range(len(rightprods)):
             if rightprods[j] in nonterminals:
@@ -166,29 +173,49 @@ def printTable(terminals, nonterminals, table):
         print(nonterminals[o]+'\t', end="")
         for m in table[o]:
             print(m, end="")
-            if(not m):
+            if(len(m)<=0):
                 print("\t", end="")
             print("\t", end="")
         print()
+def nodeName(node):
+    last_name= node.name[node.name.rfind('/')-1:]
+    return last_name
+
+    return 
 def parser(table, line, terminals, nonterminals, start, symbol_table):
     stack = deque()
+    input=deque()
     empty = u'\u03B5'
+    root=Node("S")
     
     for p in start.split()[::-1]:
-        stack.append(p)
+        stack.append(Node(p, parent=root))
+        #stack.append(p)
+    # for i in range(len(lines)):
     tokens=line.split()
     t=0
     while(len(stack)>=1):
-        while(tokens[t]!=stack[len(stack)-1] and stack[len(stack)-1]!=empty):
+        #while(tokens[t]!=stack[len(stack)-1] and stack[len(stack)-1]!=empty):
+        while(tokens[t]!=nodeName(stack[len(stack)-1]) and nodeName(stack[len(stack)-1])!=empty):
                 # for j in tokens[t].split():
-            push=table[nonterminals.index(stack.pop())][symbol_table[tokens[t]]]
+            popped=stack[len(stack)-1]
+            #push=table[nonterminals.index(stack.pop())][symbol_table[tokens[t]]]
+            push=table[nonterminals.index(nodeName(stack.pop()))][terminals.index(tokens[t])]
             #push=table[nonterminals.index(stack.pop())][terminals.index(tokens[t])]
             for j in push[0].split()[::-1]:
-                stack.append(j)
-        if (stack[len(stack)-1]!=empty):
+                stack.append(Node(j, parent=popped))
+                #stack.append(j)
+        #if (stack[len(stack)-1]!=empty):
+        if (nodeName(stack[len(stack)-1])!=empty):
+            if (tokens[t]!=nodeName(stack[len(stack)-1])):
+                Node(tokens[t],parent=stack[len(stack)-1])
+            stack.pop()
             t+=1
-        stack.pop()
-    return True
+        else:
+            if (nodeName(stack[len(stack)-1])!=empty):
+                Node(tokens[t],parent=stack[len(stack)-1])
+            stack.pop()
+    return root
             
 
 
@@ -202,6 +229,8 @@ def parser(table, line, terminals, nonterminals, start, symbol_table):
 
 
 
+#f = open("decaf_grammar_left_rec_rem_ed2.txt", "r", encoding='utf-8')
+#f = open("test_grammar_2.txt", "r", encoding='utf-8')
 f = open("grammar.txt", "r", encoding='utf-8')
 
 buffer = f.read()
@@ -240,6 +269,8 @@ follow = computeFollow(prod, firsts, terminals, nonterminals, start)
 print("Follow")
 print(follow)
 table = computeLL1Table(prod, terminals, nonterminals, firsts, follow)
+#printTable(terminals, nonterminals,table)
+print("Table: ")
 with open("table.txt", "a", encoding='utf-8') as o:
     o.write(tabulate(table,headers=terminals, showindex=nonterminals))
 
@@ -259,9 +290,16 @@ for m in range(len(symbol_lines)):
     if tokens:
         symbol_table[tokens[0]]=tokens[len(tokens)-1]
 # f.close()
-# input=["id + id $"]
-parsed=parser(table,input,terminals,nonterminals,prod[0][1], symbol_table)
-if parsed: print("Parsing input: {} Successfull".format(input))
+input="id + id $"
+ast=parser(table,input,terminals,nonterminals,prod[0][1], symbol_table)
+#if parsed: print("Parsing input: {} Successfull".format(input))
+for pre, fill, node in RenderTree(ast):
+    print("%s%s" % (pre, node.name))
+
+# DotExporter(ast).to_dotfile("ast.dot")
+# Source.from_file('ast.dot')
+# render('dot','png','ast.dot')
+
 
 
 
