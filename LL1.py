@@ -5,8 +5,9 @@ from turtle import right
 from collections import deque
 from tabulate import tabulate
 from anytree import Node, RenderTree
-from anytree.exporter import DotExporter
+from anytree.exporter import JsonExporter
 from graphviz import Source, render
+import json
 
 
 def computeFirsts(prod, terminals, nonterminals):
@@ -289,12 +290,23 @@ for m in range(len(symbol_lines)):
     tokens=symbol_lines[m].split()
     if tokens:
         symbol_table[tokens[0]]=tokens[len(tokens)-1]
-# f.close()
+f.close()
 input="id + id $"
 ast=parser(table,input,terminals,nonterminals,prod[0][1], symbol_table)
 #if parsed: print("Parsing input: {} Successfull".format(input))
 for pre, fill, node in RenderTree(ast):
     print("%s%s" % (pre, node.name))
+
+exporter = JsonExporter(indent=2, sort_keys=True)
+out_file = open("ast.json", "w")
+# data=exporter.export(ast)
+# json.dump(data, out_file, indent = 2)
+  
+
+
+
+exporter.write(ast, out_file)
+out_file.close()
 
 # DotExporter(ast).to_dotfile("ast.dot")
 # Source.from_file('ast.dot')
