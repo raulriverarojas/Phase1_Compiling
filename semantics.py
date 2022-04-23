@@ -56,7 +56,7 @@ def typecheck(line,ast, symbol_table):
     ast_post=[node.name for node in PreOrderIter(ast)]
     # for i in range(len(tokens)):
     for i in range(len(ast_post)):
-
+        
             
 
     return scope_table

@@ -183,6 +183,12 @@ def nodeName(node):
     return last_name
 
     return 
+def report_error(token):
+    with open("error_file.txt", "a") as myfile:
+        #myfile.write("Semantic Error at Line 10 cols 10-11: 1m")
+        myfile.write("Error at input: {} ".format(token))
+    return 
+
 def parser(table, line, terminals, nonterminals, start, symbol_table):
     stack = deque()
     input=deque()
@@ -201,7 +207,14 @@ def parser(table, line, terminals, nonterminals, start, symbol_table):
                 # for j in tokens[t].split():
             popped=stack[len(stack)-1]
             #push=table[nonterminals.index(stack.pop())][symbol_table[tokens[t]]]
-            push=table[nonterminals.index(nodeName(stack.pop()))][terminals.index(tokens[t])]
+            try:
+                push=table[nonterminals.index(nodeName(stack.pop()))][terminals.index(tokens[t])]
+            except:
+                report_error()
+                for i in range(len(stack)):
+                    stack.pop()
+                break
+
             #push=table[nonterminals.index(stack.pop())][terminals.index(tokens[t])]
             for j in push[0].split()[::-1]:
                 stack.append(Node(j, parent=popped))
@@ -230,9 +243,9 @@ def parser(table, line, terminals, nonterminals, start, symbol_table):
 
 
 
-#f = open("decaf_grammar_left_rec_rem_ed2.txt", "r", encoding='utf-8')
+f = open("decaf_grammar_left_rec_rem_ed2.txt", "r", encoding='utf-8')
 #f = open("test_grammar_2.txt", "r", encoding='utf-8')
-f = open("grammar.txt", "r", encoding='utf-8')
+#f = open("grammar.txt", "r", encoding='utf-8')
 
 buffer = f.read()
 lines = re.split(r"\n", buffer)  # Splits into lines
